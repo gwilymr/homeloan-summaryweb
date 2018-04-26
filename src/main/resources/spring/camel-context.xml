@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://camel.apache.org/schema/spring       http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+    <!-- You could also define a traditional camel context here -->
+    <camelContext xmlns="http://camel.apache.org/schema/spring">
+	  <propertyPlaceholder location="classpath:sql.properties" id="properties"/>
+	  <!--<jmxAgent registryPort="1215" />-->
+	  <restConfiguration component="servlet" contextPath="/homeloan" host="localhost" port="9999" bindingMode="json" >
+			<dataFormatProperty key="prettyPrint" value="true"/>
+	  </restConfiguration>
+	  <rest path="/summaryservice">
+			<get uri="/nationalID/{clientId}">
+			  <to uri="direct:customerSummary"/>
+			</get>
+	  </rest>
+	  <route>
+			<from uri="direct:customerSummary"/>
+			<log message="${headers.clientId}"/>
+			<to uri="sql:{{sql.selectCustHouseInfo}}"/>
+	  </route>
+	</camelContext>
+    
+</beans>
